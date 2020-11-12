@@ -1,6 +1,27 @@
 # MaxFucktor
 Yet another BF compiler, writtern in pure Python.
 
+## Meta
+This repo contains a fairly straight forward, yet complete implementation of BF to NASM (YASM) translator.  The resulting code is Linux specific, as it does IO via syscalls. 
+
+## Installation
+As usual:
+```bash
+$ (venv): python setup.py install
+$ (venv): sudo apt install yasm 
+```
+
+## Hello world
+The `src` folder contains handful of BF programs. Use `build.sh` script to get an executable:
+```bash
+$: ./build.sh src/helloworld.b
+$: ./res
+Hello World!
+$:
+```
+
+## ASM quality
+Compiler is ok'ish. I've done some profiling with `valgrind`, which didn't show any major branch misprediction (around 5~7% avg) and pretty much no CPU cache misses. Here's a resulting `ASM` for the `helloworld.b` program:
 
 ```asm
 global _start
