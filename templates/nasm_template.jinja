@@ -1,0 +1,35 @@
+global _start
+
+
+section .data
+    memory: times 32768 db 0
+
+
+section .text
+_start:
+    mov r10, memory
+    jmp run
+exit:
+    mov rax, 60
+    mov rdi, 0
+    syscall
+do_write:
+    mov rax, 1
+    mov rdi, 1
+    lea rsi, [r10]
+    mov rdx, 1
+    syscall
+    ret
+do_read:
+    mov rax, 0
+    mov rdi, 0
+    lea rsi, [r10]
+    mov rdx, 1
+    syscall
+    ret
+run:
+{% for command in commands %}
+    {%- for line in command.to_asm() %}
+    {{line}}
+    {% endfor %}
+{%- endfor -%}
