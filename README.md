@@ -1,5 +1,5 @@
 # MaxFucktor
-Yet another BF compiler, writtern in pure Python.
+Yet another BF compiler, written in pure Python.
 
 ## Meta
 This repo contains a fairly straight forward, yet complete implementation of BF to NASM (YASM) translator.  The resulting code is Linux specific, as it does IO via syscalls. 
