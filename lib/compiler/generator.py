@@ -134,7 +134,7 @@ class CommandAddCell(Command):
         skip_index = next(ids)
         yield "cmp byte [r10], byte 0"
         yield "je .skip%s" % skip_index
-        yield "mov r11b, byte [r10]"
+        yield "movzx r11, byte [r10]"
         yield "mov byte [r10], byte 0"
         yield "%s byte [r10+(%s)], r11b" % (self.op.value, self.shift)
         yield ".skip%s" % skip_index
