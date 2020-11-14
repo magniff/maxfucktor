@@ -120,17 +120,17 @@ class CommandMulCell(Command):
     shift1: int
     mul0: int
     mul1: int
+
+    def to_asm_block(self, mul_value: int, shift_value: int) -> Generator[str, Any, Any]:
+        yield "movzx rax, byte [r10]"
+        if mul_value > 1:
+            yield "movzx r12, byte %s" % mul_value
+            yield "mul r12b"
+        yield "add byte [r10+%s], al" % shift_value
+
     def to_asm(self) -> Generator[str, Any, Any]:
-        yield "movzx rax, byte [r10]"
-        if self.mul0 > 1:
-            yield "movzx r12, byte %s" % self.mul0
-            yield "mul r12b"
-        yield "add byte [r10+%s], al" % self.shift0
-        yield "movzx rax, byte [r10]"
-        if self.mul1 > 1:
-            yield "movzx r12, byte %s" % self.mul1
-            yield "mul r12b"
-        yield "add byte [r10+%s], al" % self.shift1
+        yield from self.to_asm_block(mul_value=self.mul0, shift_value=self.shift0)
+        yield from self.to_asm_block(mul_value=self.mul1, shift_value=self.shift1)
         yield "mov [r10], byte 0"
 
 

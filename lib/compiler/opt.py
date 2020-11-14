@@ -60,10 +60,10 @@ def optimize_mul(loop: Loop) -> Optional[Mul]:
     p4 = PlaceHolder()
     pattern = [Dec(1), Right(p0), Inc(p1), Right(p2), Inc(p3), Left(p4)]
     if pattern == loop.contains and p0.value + p2.value == p4.value:
-            return Mul(
-                shift0=p0.value, shift1=p0.value+p2.value,
-                mul0=p1.value, mul1=p3.value
-            )
+        return Mul(
+            shift0=p0.value, shift1=p0.value+p2.value,
+            mul0=p1.value, mul1=p3.value
+        )
 
 
 def optimize_add(node: Loop) -> Optional[Add]:
