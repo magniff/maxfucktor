@@ -2,21 +2,28 @@ from dataclasses import dataclass
 from . basic import BaseASTNode
 
 
-@dataclass
+@dataclass(eq=False)
 class Drop(BaseASTNode):
     pass
 
 
-@dataclass
+@dataclass(eq=False)
 class Add(BaseASTNode):
     shift: int
-    def __init__(self, shift: int):
-        self.shift = shift
 
 
-@dataclass
+@dataclass(eq=False)
 class Sub(BaseASTNode):
     shift: int
-    def __init__(self, shift: int):
-        self.shift = shift
 
+
+@dataclass(eq=False)
+class Mul(BaseASTNode):
+    #[->+++>+++++++<<]
+    # mem[p+1] += mem[p] * 3;
+    # mem[p+2] += mem[p] * 7;
+    # mem[p] = 0
+    shift0: int
+    shift1: int
+    mul0: int
+    mul1: int

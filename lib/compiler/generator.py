@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from lib.compiler.opt import optimize
 from lib.ast import (
     BaseASTNode, Dec, Inc, Left, Output, Input,
-    Program, Right, Loop, Add, Sub, Drop
+    Program, Right, Loop, Add, Sub, Mul, Drop
 )
 
 
@@ -115,10 +115,29 @@ class ReadSyscall(Command):
 
 
 @dataclass
+class CommandMulCell(Command):
+    shift0: int
+    shift1: int
+    mul0: int
+    mul1: int
+    def to_asm(self) -> Generator[str, Any, Any]:
+        yield "movzx rax, byte [r10]"
+        if self.mul0 > 1:
+            yield "movzx r12, byte %s" % self.mul0
+            yield "mul r12b"
+        yield "add byte [r10+%s], al" % self.shift0
+        yield "movzx rax, byte [r10]"
+        if self.mul1 > 1:
+            yield "movzx r12, byte %s" % self.mul1
+            yield "mul r12b"
+        yield "add byte [r10+%s], al" % self.shift1
+        yield "mov [r10], byte 0"
+
+
+@dataclass
 class CommandResetCell(Command):
     def to_asm(self) -> Generator[str, Any, Any]:
         yield "mov byte [r10], byte 0"
-
 
 
 class Op(enum.Enum):
@@ -168,7 +187,7 @@ def visit_Input(node: Input, *args, **kwargs) -> VisitorOutput: # type: ignore
     yield ReadSyscall(node.repeat)
 
 
-def visit_Drop(node: Drop, *args, **kwargs) -> VisitorOutput: # type: ignore
+def visit_Drop(_: Drop, *args, **kwargs) -> VisitorOutput: # type: ignore
     yield CommandResetCell()
 
 
@@ -178,6 +197,12 @@ def visit_Add(node: Add, *args, **kwargs) -> VisitorOutput: # type: ignore
 
 def visit_Sub(node: Sub, *args, **kwargs) -> VisitorOutput: # type: ignore
     yield CommandAddCell(shift=node.shift, op=Op.SUB)
+
+
+def visit_Mul(node: Mul, *args, **kwargs) -> VisitorOutput: # type: ignore
+    yield CommandMulCell(
+        shift0=node.shift0, shift1=node.shift1, mul0=node.mul0, mul1=node.mul1
+    )
 
 
 def visit_Loop(node: Loop, cont_id: Optional[str]=None) -> VisitorOutput:
