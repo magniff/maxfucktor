@@ -12,7 +12,7 @@ $ (venv): sudo apt install yasm
 ```
 
 ## Hello world
-The `src` folder contains handful of BF programs. Use `build.sh` script to get an executable:
+The `src` folder contains handful of BF programs.  Use `build.sh` script to get an executable:
 ```bash
 $: ./build.sh src/helloworld.b
 $: ./res
@@ -21,8 +21,7 @@ $:
 ```
 
 ## ASM quality
-Compiler is ok'ish. I've done some profiling with `valgrind`, which didn't show any major branch misprediction (around 5~7% avg) and pretty much no CPU cache misses. Here's a resulting `ASM` for the `helloworld.b` program:
-
+Compiler is doing ok'ish job.  I've done some profiling with `valgrind`, which didn't show any major branch misprediction (around 5~7% avg) and pretty much no CPU cache misses.  Here's a resulting `ASM` for the `helloworld.b` program:
 ```asm
 global _start
 
@@ -34,17 +33,13 @@ section .data
 section .text
 _start:
     mov rsi, memory
+    mov rdx, 1 ;; rdx wont change during the runtime
+    mov rdi, 1 ;; rdi represents an io descriptor, typically 1 or 0
     jmp run
 exit:
     mov rax, 60
     mov rdi, 0
     syscall
-do_read:
-    mov rax, 0
-    mov rdi, 0
-    mov rdx, 1
-    syscall
-    ret
 run:
     add byte [rsi], byte 10
     l1:
@@ -65,66 +60,42 @@ run:
     add rsi, 1
     add byte [rsi], byte 2
     mov rax, 1
-    mov rdi, 1
-    mov rdx, 1
     syscall
     add rsi, 1
     add byte [rsi], byte 1
     mov rax, 1
-    mov rdi, 1
-    mov rdx, 1
     syscall
     add byte [rsi], byte 7
     mov rax, 1
-    mov rdi, 1
-    mov rdx, 1
     syscall
     mov rax, 1
-    mov rdi, 1
-    mov rdx, 1
     syscall
     add byte [rsi], byte 3
     mov rax, 1
-    mov rdi, 1
-    mov rdx, 1
     syscall
     add rsi, 1
     add byte [rsi], byte 2
     mov rax, 1
-    mov rdi, 1
-    mov rdx, 1
     syscall
     sub rsi, 2
     add byte [rsi], byte 15
     mov rax, 1
-    mov rdi, 1
-    mov rdx, 1
     syscall
     add rsi, 1
     mov rax, 1
-    mov rdi, 1
-    mov rdx, 1
     syscall
     add byte [rsi], byte 3
     mov rax, 1
-    mov rdi, 1
-    mov rdx, 1
     syscall
     sub byte [rsi], byte 6
     mov rax, 1
-    mov rdi, 1
-    mov rdx, 1
     syscall
     sub byte [rsi], byte 8
     mov rax, 1
-    mov rdi, 1
-    mov rdx, 1
     syscall
     add rsi, 1
     add byte [rsi], byte 1
     mov rax, 1
-    mov rdi, 1
-    mov rdx, 1
     syscall
     jmp exit
 ```
