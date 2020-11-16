@@ -8,17 +8,13 @@ section .data
 section .text
 _start:
     mov rsi, memory
+    mov rdx, 1 ;; rdx wont change during the runtime
+    mov rdi, 1 ;; rdi represents an io descriptor, typically 1 or 0
     jmp run
 exit:
     mov rax, 60
     mov rdi, 0
     syscall
-do_read:
-    mov rax, 0
-    mov rdi, 0
-    mov rdx, 1
-    syscall
-    ret
 run:
 {% for command in commands %}
     {%- for line in command.to_asm() %}
