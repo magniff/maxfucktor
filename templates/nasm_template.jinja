@@ -7,23 +7,15 @@ section .data
 
 section .text
 _start:
-    mov r10, memory
+    mov rsi, memory
     jmp run
 exit:
     mov rax, 60
     mov rdi, 0
     syscall
-do_write:
-    mov rax, 1
-    mov rdi, 1
-    lea rsi, [r10]
-    mov rdx, 1
-    syscall
-    ret
 do_read:
     mov rax, 0
     mov rdi, 0
-    lea rsi, [r10]
     mov rdx, 1
     syscall
     ret

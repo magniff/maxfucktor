@@ -50,7 +50,7 @@ class CommandInitLoop(Command):
     cont_id: str
     def to_asm(self) -> Generator[str, Any, Any]:
         yield "%s:" % self.this_id
-        yield "cmp byte [r10], byte 0"
+        yield "cmp byte [rsi], byte 0"
         yield "je %s" % self.cont_id
 
 
@@ -74,28 +74,28 @@ class CommandLoopBack(Command):
 class CommandRShift(Command):
     repetitions: int
     def to_asm(self) -> Generator[str, Any, Any]:
-        yield "add r10, %s" % self.repetitions
+        yield "add rsi, %s" % self.repetitions
 
 
 @dataclass
 class CommandLShift(Command):
     repetitions: int
     def to_asm(self) -> Generator[str, Any, Any]:
-        yield "sub r10, %s" % self.repetitions
+        yield "sub rsi, %s" % self.repetitions
 
 
 @dataclass
 class CommandIncrement(Command):
     repetitions: int
     def to_asm(self) -> Generator[str, Any, Any]:
-        yield "add byte [r10], byte %s" % self.repetitions
+        yield "add byte [rsi], byte %s" % self.repetitions
 
 
 @dataclass
 class CommandDecrement(Command):
     repetitions: int
     def to_asm(self) -> Generator[str, Any, Any]:
-        yield "sub byte [r10], byte %s" % self.repetitions
+        yield "sub byte [rsi], byte %s" % self.repetitions
 
 
 @dataclass
@@ -103,7 +103,10 @@ class WriteSyscall(Command):
     repetitions: int
     def to_asm(self) -> Generator[str, Any, Any]:
         for _ in range(self.repetitions):
-            yield "call do_write"
+            yield "mov rax, 1"
+            yield "mov rdi, 1"
+            yield "mov rdx, 1"
+            yield "syscall"
 
 
 @dataclass
@@ -111,7 +114,10 @@ class ReadSyscall(Command):
     repetitions: int
     def to_asm(self) -> Generator[str, Any, Any]:
         for _ in range(self.repetitions):
-            yield "call do_read"
+            yield "mov rax, 0"
+            yield "mov rdi, 0"
+            yield "mov rdx, 1"
+            yield "syscall"
 
 
 @dataclass
@@ -122,22 +128,23 @@ class CommandMulCell(Command):
     mul1: int
 
     def to_asm_block(self, mul_value: int, shift_value: int) -> Generator[str, Any, Any]:
-        yield "movzx rax, byte [r10]"
+        yield "movzx rax, byte [rsi]"
         if mul_value > 1:
             yield "movzx r12, byte %s" % mul_value
             yield "mul r12b"
-        yield "add byte [r10+%s], al" % shift_value
+        yield "add byte [rsi+%s], al" % shift_value
 
     def to_asm(self) -> Generator[str, Any, Any]:
+        yield ";;; start Mul block"
         yield from self.to_asm_block(mul_value=self.mul0, shift_value=self.shift0)
         yield from self.to_asm_block(mul_value=self.mul1, shift_value=self.shift1)
-        yield "mov [r10], byte 0"
-
+        yield "mov [rsi], byte 0"
+        yield ";;; end Mul block"
 
 @dataclass
 class CommandResetCell(Command):
     def to_asm(self) -> Generator[str, Any, Any]:
-        yield "mov byte [r10], byte 0"
+        yield "mov byte [rsi], byte 0"
 
 
 class Op(enum.Enum):
@@ -151,13 +158,14 @@ class CommandAddCell(Command):
     op: Op
     def to_asm(self) -> Generator[str, Any, Any]:
         skip_index = next(ids)
-        yield "cmp byte [r10], byte 0"
+        yield ";;; start Add block"
+        yield "cmp byte [rsi], byte 0"
         yield "je .skip%s" % skip_index
-        yield "movzx r11, byte [r10]"
-        yield "mov byte [r10], byte 0"
-        yield "%s byte [r10+(%s)], r11b" % (self.op.value, self.shift)
+        yield "movzx r11, byte [rsi]"
+        yield "mov byte [rsi], byte 0"
+        yield "%s byte [rsi+(%s)], r11b" % (self.op.value, self.shift)
         yield ".skip%s" % skip_index
-
+        yield ";;; end Add block"
 
 def visit(node: BaseASTNode, cont_id: Optional[str]) -> VisitorOutput:
     yield from getattr(visitors, "visit_%s" % type(node).__qualname__)(node, cont_id)
