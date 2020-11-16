@@ -33,70 +33,117 @@ section .data
 
 section .text
 _start:
-    mov r10, memory
+    mov rsi, memory
     jmp run
 exit:
     mov rax, 60
     mov rdi, 0
     syscall
-do_write:
-    mov rax, 1
-    mov rdi, 1
-    lea rsi, [r10]
-    mov rdx, 1
-    syscall
-    ret
 do_read:
     mov rax, 0
     mov rdi, 0
-    lea rsi, [r10]
     mov rdx, 1
     syscall
     ret
 run:
-    add byte [r10], byte 10
+    add byte [rsi], byte 10
     l1:
-    cmp byte [r10], byte 0
+    cmp byte [rsi], byte 0
     je l2
-    add r10, 1
-    add byte [r10], byte 7
-    add r10, 1
-    add byte [r10], byte 10
-    add r10, 1
-    add byte [r10], byte 3
-    add r10, 1
-    add byte [r10], byte 1
-    sub r10, 4
-    sub byte [r10], byte 1
+    add rsi, 1
+    add byte [rsi], byte 7
+    add rsi, 1
+    add byte [rsi], byte 10
+    add rsi, 1
+    add byte [rsi], byte 3
+    add rsi, 1
+    add byte [rsi], byte 1
+    sub rsi, 4
+    sub byte [rsi], byte 1
     jmp l1
     l2:
-    add r10, 1
-    add byte [r10], byte 2
-    call do_write
-    add r10, 1
-    add byte [r10], byte 1
-    call do_write
-    add byte [r10], byte 7
-    call do_write
-    call do_write
-    add byte [r10], byte 3
-    call do_write
-    add r10, 1
-    add byte [r10], byte 2
-    call do_write
-    sub r10, 2
-    add byte [r10], byte 15
-    call do_write
-    add r10, 1
-    call do_write
-    add byte [r10], byte 3
-    call do_write
-    sub byte [r10], byte 6
-    call do_write
-    sub byte [r10], byte 8
-    call do_write
-    add r10, 1
-    add byte [r10], byte 1
-    call do_write
+    add rsi, 1
+    add byte [rsi], byte 2
+    mov rax, 1
+    mov rdi, 1
+    mov rdx, 1
+    syscall
+    add rsi, 1
+    add byte [rsi], byte 1
+    mov rax, 1
+    mov rdi, 1
+    mov rdx, 1
+    syscall
+    add byte [rsi], byte 7
+    mov rax, 1
+    mov rdi, 1
+    mov rdx, 1
+    syscall
+    mov rax, 1
+    mov rdi, 1
+    mov rdx, 1
+    syscall
+    add byte [rsi], byte 3
+    mov rax, 1
+    mov rdi, 1
+    mov rdx, 1
+    syscall
+    add rsi, 1
+    add byte [rsi], byte 2
+    mov rax, 1
+    mov rdi, 1
+    mov rdx, 1
+    syscall
+    sub rsi, 2
+    add byte [rsi], byte 15
+    mov rax, 1
+    mov rdi, 1
+    mov rdx, 1
+    syscall
+    add rsi, 1
+    mov rax, 1
+    mov rdi, 1
+    mov rdx, 1
+    syscall
+    add byte [rsi], byte 3
+    mov rax, 1
+    mov rdi, 1
+    mov rdx, 1
+    syscall
+    sub byte [rsi], byte 6
+    mov rax, 1
+    mov rdi, 1
+    mov rdx, 1
+    syscall
+    sub byte [rsi], byte 8
+    mov rax, 1
+    mov rdi, 1
+    mov rdx, 1
+    syscall
+    add rsi, 1
+    add byte [rsi], byte 1
+    mov rax, 1
+    mov rdi, 1
+    mov rdx, 1
+    syscall
     jmp exit
+```
+
+### Performance
+> Not great, not terrible. We did everything right. (c)
+
+```bash
+$ multitime -q -n 50 "./hanoi"
+            Mean        Std.Dev.    Min         Median      Max
+real        0.056       0.012       0.041       0.055       0.083       
+user        0.053       0.010       0.038       0.052       0.077       
+sys         0.003       0.003       0.000       0.004       0.008
+```
+
+```bash
+$ multitime -q -n 50 "./mandelbrot" 
+            Mean        Std.Dev.    Min         Median      Max
+real        0.894       0.018       0.873       0.886       0.966       
+user        0.893       0.017       0.873       0.885       0.966       
+sys         0.001       0.002       0.000       0.000       0.008
 ```
